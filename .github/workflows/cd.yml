@@ -1,0 +1,40 @@
+# CD: depois que o CI passa na main, empacota o código testado e publica uma nova versão (Release).
+# Cada versão traz o .zip do projeto pronto para instalar (npm install → migrate → generate → start).
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: publicar versão
+    # Só publica quando o CI terminou com sucesso num push para a main (nunca a partir de PR)
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar exatamente o commit testado pelo CI
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Empacotar o projeto
+        run: |
+          VERSAO="v1.0.${{ github.run_number }}"
+          echo "VERSAO=$VERSAO" >> "$GITHUB_ENV"
+          git archive --format=zip --prefix=oficina-mecanica/ -o "oficina-mecanica-$VERSAO.zip" HEAD
+
+      - name: Publicar a versão no GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$VERSAO" "oficina-mecanica-$VERSAO.zip" \
+            --target "${{ github.event.workflow_run.head_sha }}" \
+            --title "Oficina Mecânica $VERSAO" \
+            --generate-notes

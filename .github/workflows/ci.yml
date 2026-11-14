@@ -1,0 +1,86 @@
+# CI: roda em todo Pull Request para a main e em todo push na main.
+# Sobe um MySQL real, aplica as migrations, inicia o servidor e roda os testes de integração.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    name: testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: oficina
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/oficina
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: 3306
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: oficina
+      PORT: 3000
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Validar o schema do Prisma
+        run: npx prisma validate
+
+      - name: Aplicar migrations no MySQL
+        run: npx prisma migrate deploy
+
+      - name: Gerar o cliente do Prisma
+        run: npx prisma generate
+
+      - name: Verificar sintaxe dos arquivos JavaScript
+        run: find src test \( -name "*.js" -o -name "*.mjs" \) -not -path "src/generated/*" -print0 | xargs -0 -n1 node --check
+
+      - name: Iniciar o servidor
+        run: |
+          npm start > servidor.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/css/style.css > /dev/null && echo "Servidor no ar" && exit 0
+            sleep 1
+          done
+          echo "Servidor não subiu" && cat servidor.log && exit 1
+
+      - name: Rodar os testes de integração
+        run: npm test
+
+      - name: Log do servidor (se algo falhar)
+        if: failure()
+        run: cat servidor.log

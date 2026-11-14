@@ -1,0 +1,195 @@
+/* Oficina Mecânica — aço galvanizado, grafite, azul Mercosul e amarelo de segurança */
+:root {
+  --aco: #e4e7ea;
+  --aco-escuro: #c9ced4;
+  --grafite: #1c2430;
+  --grafite-suave: #4a5563;
+  --mercosul: #003399;
+  --seguranca: #f2c200;
+  --perigo: #c8102e;
+  --branco: #ffffff;
+  --titulo: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --texto: "Barlow", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--texto); font-size: 1.0625rem; line-height: 1.5; background: var(--aco); color: var(--grafite); }
+h1, h2 { font-family: var(--titulo); font-weight: 700; line-height: 1.1; }
+h1 { font-size: clamp(2rem, 5vw, 2.75rem); }
+h2 { font-size: 1.5rem; }
+a { color: var(--mercosul); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--mercosul); outline-offset: 2px; }
+
+.pular { position: absolute; left: -999px; top: 8px; background: var(--branco); padding: 8px 12px; z-index: 10; }
+.pular:focus { left: 8px; }
+
+/* Topo */
+.topo { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center;
+  padding: 14px max(16px, calc((100% - 1040px) / 2 + 16px)); background: var(--grafite); color: var(--branco); }
+.marca { display: inline-flex; align-items: center; gap: 10px; color: var(--branco); text-decoration: none;
+  font-family: var(--titulo); font-weight: 700; font-size: 1.5rem; }
+.marca-icone { width: 26px; height: 26px; color: var(--seguranca); }
+.menu { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; }
+.menu a:not(.btn) { color: #d5dbe2; text-decoration: none; font-weight: 500; padding: 6px 0; border-bottom: 2px solid transparent; }
+.menu a:not(.btn):hover { color: var(--branco); }
+.menu a[aria-current="page"] { color: var(--branco); border-bottom-color: var(--seguranca); }
+.topo :focus-visible { outline-color: var(--seguranca); }
+
+.container { max-width: 1040px; margin: 0 auto; padding: 40px 16px 64px; }
+
+/* Botões */
+.btn { display: inline-block; border: 0; border-radius: 4px; padding: 11px 20px; font: inherit; font-weight: 600;
+  text-decoration: none; cursor: pointer; line-height: 1.2; }
+.btn-principal { background: var(--seguranca); color: var(--grafite); }
+.btn-principal:hover { background: #ffd21f; }
+.btn-perigo { background: transparent; color: var(--perigo); box-shadow: inset 0 0 0 2px var(--perigo); }
+.btn-perigo:hover { background: var(--perigo); color: var(--branco); }
+
+/* Placa Mercosul */
+.placa { display: inline-flex; flex-direction: column; min-width: 7.2em; background: var(--branco);
+  border: 2px solid var(--grafite); border-radius: 5px; overflow: hidden; text-align: center; line-height: 1; }
+.placa-faixa { background: var(--mercosul); color: var(--branco); font-family: var(--titulo); font-weight: 600;
+  font-size: .5em; letter-spacing: .3em; padding: 2px 0 2px .3em; }
+.placa-num { font-family: var(--titulo); font-weight: 700; font-size: 1.05em; letter-spacing: .08em; padding: 4px 8px 3px; color: var(--grafite); }
+.placa-grande { font-size: 2.1rem; border-width: 3px; border-radius: 8px; }
+
+/* Painel */
+.resumo { display: grid; gap: 16px; justify-items: start; padding-bottom: 40px; margin-bottom: 40px;
+  border-bottom: 2px solid var(--aco-escuro); }
+.resumo-frase { font-size: clamp(1.25rem, 2.6vw, 1.6rem); max-width: 42ch; text-wrap: balance; color: var(--grafite-suave); }
+.resumo-frase strong { color: var(--grafite); font-weight: 600; }
+
+.bloco-topo { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+
+/* Tabela de ordens */
+.tabela { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: 6px; overflow: hidden; }
+.tabela th { text-align: left; font-size: .875rem; font-weight: 600; color: var(--grafite-suave); padding: 12px 16px;
+  border-bottom: 2px solid var(--grafite); }
+.tabela td { padding: 14px 16px; border-bottom: 1px solid var(--aco); vertical-align: middle; }
+.tabela tr:last-child td { border-bottom: 0; }
+.tabela tbody tr { position: relative; }
+.tabela tbody tr:hover { background: #f5f7f9; }
+/* a linha inteira abre a ordem: o link do veículo cobre a linha */
+.col-veiculo a::after { content: ""; position: absolute; inset: 0; }
+.tabela .num { text-align: right; font-variant-numeric: tabular-nums; }
+.col-veiculo a { font-weight: 600; color: var(--grafite); }
+.col-veiculo a:hover { color: var(--mercosul); }
+.col-data { color: var(--grafite-suave); }
+.col-valor { font-weight: 600; }
+
+.vazio { background: var(--branco); border: 2px dashed var(--aco-escuro); border-radius: 6px; padding: 40px 24px;
+  display: grid; gap: 16px; justify-items: start; }
+
+/* Ficha (detalhes e formulário) */
+.voltar { display: inline-block; margin-bottom: 16px; font-weight: 500; }
+.ficha { max-width: 720px; background: var(--branco); border: 2px solid var(--grafite); border-radius: 6px; }
+.ficha-topo { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center;
+  padding: 20px 24px; border-bottom: 2px solid var(--grafite); }
+.ficha-tipo { display: block; font-family: var(--texto); font-size: 1rem; font-weight: 500; color: var(--grafite-suave); margin-bottom: 2px; }
+.ficha-numero { font-size: 2.25rem; }
+.ficha-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.ficha-campos > div, .ficha-campos > label { padding: 16px 24px; border-bottom: 1px solid var(--aco); }
+.ficha-campos > :nth-child(odd):not(.ficha-largo) { border-right: 1px solid var(--aco); }
+.ficha-largo { grid-column: 1 / -1; }
+.ficha dt { font-size: .875rem; color: var(--grafite-suave); }
+.ficha dd { font-weight: 600; max-width: 65ch; white-space: pre-line; }
+.ficha-total { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 24px;
+  background: var(--grafite); color: var(--branco); }
+.ficha-total strong { font-family: var(--titulo); font-size: 2rem; font-variant-numeric: tabular-nums; }
+
+.ficha-form label { display: flex; flex-direction: column; gap: 6px; font-size: .875rem; font-weight: 600; color: var(--grafite-suave); }
+input, textarea { width: 100%; padding: 10px 12px; border: 2px solid #7b8694; border-radius: 4px;
+  font: inherit; font-size: 1.0625rem; color: var(--grafite); background: var(--branco); }
+input:focus-visible, textarea:focus-visible { border-color: var(--mercosul); outline-offset: 0; }
+.campo-placa { font-family: var(--titulo); font-weight: 700; font-size: 1.25rem; letter-spacing: .08em; text-transform: uppercase; }
+.ficha-acoes { padding: 20px 24px; }
+.alerta { margin: 20px 24px 0; padding: 12px 16px; background: #fdecee; color: #8a0b20; border: 1px solid #f1b8c1; border-radius: 4px; font-weight: 500; }
+
+.acoes { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; margin-top: 24px; }
+
+/* Erro */
+.erro { max-width: 560px; }
+.erro-corpo { padding: 20px 24px 24px; }
+.erro-corpo .acoes { margin-top: 16px; }
+.erro p { font-size: 1.25rem; color: var(--grafite-suave); }
+
+/* Aviso de sucesso, dicas de campo e texto só para leitor de tela */
+.aviso { margin-bottom: 24px; padding: 12px 16px; background: #e6edfa; color: #002a80; border: 1px solid #9fb3e0; border-radius: 4px; font-weight: 600; max-width: 720px; }
+.dica { font-weight: 400; font-size: .8125rem; color: var(--grafite-suave); }
+.contagem { color: var(--grafite-suave); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Rodapé */
+.rodape { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; max-width: 1040px; margin: 0 auto; padding: 24px 16px 40px;
+  border-top: 2px solid var(--aco-escuro); color: var(--grafite-suave); font-size: .9375rem; }
+.rodape nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+
+/* Documentação */
+.doc { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 48px; align-items: start; }
+.doc-indice { position: sticky; top: 24px; font-size: .9375rem; }
+.doc-indice-titulo { font-weight: 600; margin-bottom: 8px; cursor: pointer; }
+.doc-indice ol { list-style: none; display: grid; gap: 2px; border-left: 2px solid var(--aco-escuro); }
+.doc-indice a { display: block; padding: 3px 0 3px 14px; color: var(--grafite-suave); text-decoration: none; }
+.doc-indice a:hover { color: var(--mercosul); }
+.doc-conteudo { max-width: 760px; }
+.doc-topo { margin-bottom: 40px; }
+.doc-intro { font-size: 1.25rem; color: var(--grafite-suave); max-width: 60ch; margin-top: 12px; }
+.doc-conteudo section { padding-top: 32px; margin-top: 32px; border-top: 2px solid var(--aco-escuro); scroll-margin-top: 16px; }
+.doc-conteudo h3 { font-family: var(--titulo); font-size: 1.25rem; font-weight: 600; margin: 28px 0 8px; }
+.doc-conteudo p, .doc-conteudo ol.doc-niveis { max-width: 68ch; margin: 12px 0; }
+.doc-conteudo :not(pre) > code { font-size: .9em; background: var(--branco); border: 1px solid var(--aco-escuro); border-radius: 3px; padding: 0 4px; }
+.doc-niveis { padding-left: 1.4em; display: grid; gap: 8px; }
+
+.doc-tabela { width: 100%; border-collapse: collapse; margin: 20px 0; background: var(--branco); font-size: .9375rem; }
+.doc-tabela th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--grafite); color: var(--grafite-suave); font-weight: 600; }
+.doc-tabela td { padding: 10px 12px; border-bottom: 1px solid var(--aco); vertical-align: top; }
+
+.codigo { margin: 20px 0; border-radius: 6px; overflow: hidden; background: var(--grafite); }
+.codigo figcaption { padding: 8px 16px; font-size: .8125rem; color: #aeb7c2; border-bottom: 1px solid #2e3947; }
+.codigo pre { margin: 0; padding: 16px; overflow-x: auto; }
+.codigo code { font-family: "Cascadia Code", Consolas, "SFMono-Regular", monospace; font-size: .875rem; line-height: 1.6; color: #e6eaee; font-variant-ligatures: none; }
+.hljs-keyword, .hljs-built_in, .hljs-tag { color: #ffd84d; }
+.hljs-string, .hljs-attr + .hljs-string { color: #9fd8a4; }
+.hljs-comment { color: #8592a3; font-style: italic; }
+.hljs-number, .hljs-literal { color: #f5a97f; }
+.hljs-title, .hljs-name, .hljs-attr { color: #8fb8ff; }
+
+.doc-completo { margin: 20px 0; }
+.doc-completo summary { cursor: pointer; font-weight: 600; color: var(--mercosul); }
+
+.fluxo { list-style: none; counter-reset: etapa; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+.fluxo li { counter-increment: etapa; background: var(--branco); border: 2px solid var(--grafite); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; }
+.fluxo li::before { content: counter(etapa); font-family: var(--titulo); font-weight: 700; color: var(--mercosul); }
+.fluxo strong { font-family: var(--titulo); font-size: 1.125rem; }
+.fluxo span { font-size: .875rem; color: var(--grafite-suave); }
+.fluxo code, .doc-tabela code { overflow-wrap: anywhere; }
+.rolagem { overflow-x: auto; margin: 20px 0; }
+.rolagem .doc-tabela { margin: 0; }
+
+@media (max-width: 900px) {
+  .doc { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .doc-indice { position: static; }
+  .doc-indice ol { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+}
+
+/* Celular: tabela vira lista empilhada, ficha em uma coluna */
+@media (max-width: 640px) {
+  .tabela thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tabela, .tabela tbody, .tabela tr, .tabela td { display: block; }
+  .tabela tr { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; padding: 14px 16px; border-bottom: 1px solid var(--aco); }
+  .tabela td { padding: 0; border: 0; }
+  .col-placa { grid-row: 1 / span 4; align-self: start; }
+  .col-cliente { color: var(--grafite-suave); }
+  .col-data { grid-column: 2; font-size: .875rem; }
+  .col-valor { grid-column: 2; text-align: left !important; }
+  .ficha-campos { grid-template-columns: 1fr; }
+  .ficha-campos > :nth-child(odd):not(.ficha-largo) { border-right: 0; }
+  .placa-grande { font-size: 1.6rem; }
+  /* topo em 2 linhas: marca + "Abrir ordem" em cima, links embaixo */
+  .topo { gap: 10px 12px; }
+  .marca { font-size: 1.3rem; }
+  .menu { display: contents; }
+  .menu .btn { order: 2; margin-left: auto; padding: 9px 12px; }
+  .topo::after { content: ""; order: 3; flex-basis: 100%; height: 0; }
+  .menu a:not(.btn) { order: 4; }
+}

@@ -1,0 +1,38 @@
+<%- include("../partials/header") %>
+<a href="<%= servico.id ? `/servicos/${servico.id}` : '/servicos' %>" class="voltar">Cancelar e voltar</a>
+
+<form action="<%= acao %>" method="POST" class="ficha ficha-form">
+  <header class="ficha-topo">
+    <h1 class="ficha-numero"><span class="ficha-tipo">Ordem de serviço</span> <%= servico.id ? `Editar nº ${String(servico.id).padStart(4, "0")}` : "Nova ordem" %></h1>
+  </header>
+
+  <% if (erro) { %><p class="alerta" role="alert" id="erro-form"><%= erro %></p><% } %>
+
+  <div class="ficha-campos">
+    <label>Cliente
+      <input type="text" name="cliente" autocomplete="off" maxlength="100" value="<%= servico.cliente || '' %>" required>
+    </label>
+    <label>Placa
+      <input type="text" name="placa" class="campo-placa" maxlength="8" placeholder="ABC1D23"
+             pattern="[A-Za-z]{3}-?[0-9][A-Za-z0-9][0-9]{2}" autocapitalize="characters"
+             aria-describedby="dica-placa" value="<%= servico.placa || '' %>" required>
+      <span class="dica" id="dica-placa">Mercosul (ABC1D23) ou antiga (ABC-1234)</span>
+    </label>
+    <label>Veículo
+      <input type="text" name="veiculo" maxlength="100" placeholder="Modelo e ano, ex.: Fiat Uno 2015" value="<%= servico.veiculo || '' %>" required>
+    </label>
+    <label>Valor (R$)
+      <input type="text" name="valor" inputmode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="Ex.: 1350,00"
+             aria-describedby="dica-valor" value="<%= servico.valor ?? '' %>" required>
+      <span class="dica" id="dica-valor">Use vírgula para os centavos</span>
+    </label>
+    <label class="ficha-largo">Serviço a executar
+      <textarea name="descricao" rows="4" maxlength="2000" placeholder="O que o cliente relatou e o que será feito" required><%= servico.descricao || '' %></textarea>
+    </label>
+  </div>
+
+  <footer class="ficha-acoes">
+    <button class="btn btn-principal"><%= servico.id ? "Salvar alterações" : "Abrir ordem" %></button>
+  </footer>
+</form>
+<%- include("../partials/footer") %>

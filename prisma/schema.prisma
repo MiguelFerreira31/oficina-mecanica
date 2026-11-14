@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Ordem de serviço da oficina
+model Servico {
+  id           Int      @id @default(autoincrement())
+  cliente      String   @db.VarChar(100)
+  veiculo      String   @db.VarChar(100)
+  placa        String   @db.VarChar(10)
+  descricao    String   @db.Text
+  valor        Decimal  @db.Decimal(10, 2)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}

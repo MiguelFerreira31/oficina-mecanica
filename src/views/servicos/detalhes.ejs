@@ -1,0 +1,31 @@
+<%- include("../partials/header") %>
+<a href="/servicos" class="voltar">Voltar para as ordens</a>
+
+<article class="ficha">
+  <header class="ficha-topo">
+    <h1 class="ficha-numero"><span class="ficha-tipo">Ordem de serviço</span> Nº <%= String(servico.id).padStart(4, "0") %></h1>
+    <%- include("../partials/placa", { placa: servico.placa, grande: true }) %>
+  </header>
+
+  <dl class="ficha-campos">
+    <div><dt>Cliente</dt><dd><%= servico.cliente %></dd></div>
+    <div><dt>Veículo</dt><dd><%= servico.veiculo %></dd></div>
+    <div><dt>Aberta em</dt><dd><%= servico.criadoEm.toLocaleDateString("pt-BR") %></dd></div>
+    <div><dt>Última alteração</dt><dd><%= servico.atualizadoEm.toLocaleDateString("pt-BR") %></dd></div>
+    <div class="ficha-largo"><dt>Serviço a executar</dt><dd><%= servico.descricao %></dd></div>
+  </dl>
+
+  <footer class="ficha-total">
+    <span>Total</span>
+    <strong><%= moeda(servico.valor) %></strong>
+  </footer>
+</article>
+
+<div class="acoes">
+  <a href="/servicos/<%= servico.id %>/editar" class="btn btn-principal">Editar ordem</a>
+  <form action="/servicos/<%= servico.id %>?_method=DELETE" method="POST"
+        onsubmit="return confirm('Excluir a ordem de serviço nº <%= String(servico.id).padStart(4, "0") %>? Essa ação não pode ser desfeita.')">
+    <button class="btn btn-perigo">Excluir ordem</button>
+  </form>
+</div>
+<%- include("../partials/footer") %>

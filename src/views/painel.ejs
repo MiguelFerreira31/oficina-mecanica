@@ -1,0 +1,24 @@
+<%- include("partials/header") %>
+<section class="resumo">
+  <h1>Resumo da oficina</h1>
+  <% if (quantidade === 0) { %>
+    <p class="resumo-frase">Nenhuma ordem de serviço registrada. Quando o próximo carro chegar, abra a ordem com placa, cliente e o que precisa ser feito.</p>
+    <a href="/servicos/novo" class="btn btn-principal">Abrir a primeira ordem</a>
+  <% } else { %>
+    <p class="resumo-frase">
+      <strong><%= quantidade %> <%= quantidade === 1 ? "ordem registrada" : "ordens registradas" %></strong>,
+      somando <strong><%= moeda(total) %></strong> em serviços.
+    </p>
+  <% } %>
+</section>
+
+<% if (quantidade > 0) { %>
+  <section class="bloco">
+    <div class="bloco-topo">
+      <h2>Últimas ordens</h2>
+      <% if (quantidade > recentes.length) { %><a href="/servicos">Ver todas as <%= quantidade %></a><% } %>
+    </div>
+    <%- include("partials/tabela", { servicos: recentes }) %>
+  </section>
+<% } %>
+<%- include("partials/footer") %>

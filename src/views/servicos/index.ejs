@@ -1,0 +1,15 @@
+<%- include("../partials/header") %>
+<div class="bloco-topo">
+  <h1>Ordens de serviço</h1>
+  <% if (servicos.length) { %><p class="contagem"><%= servicos.length %> <%= servicos.length === 1 ? "ordem" : "ordens" %>, da mais recente para a mais antiga</p><% } %>
+</div>
+
+<% if (servicos.length === 0) { %>
+  <div class="vazio">
+    <p>Nenhuma ordem de serviço registrada ainda.</p>
+    <a href="/servicos/novo" class="btn btn-principal">Abrir a primeira ordem</a>
+  </div>
+<% } else { %>
+  <%- include("../partials/tabela", { servicos }) %>
+<% } %>
+<%- include("../partials/footer") %>

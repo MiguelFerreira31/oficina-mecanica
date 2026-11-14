@@ -1,0 +1,36 @@
+<%
+  // Título da aba e item ativo do menu, a partir da URL atual
+  const titulos = { "/": "Painel", "/servicos": "Ordens de serviço", "/servicos/novo": "Nova ordem", "/documentacao": "Documentação" };
+  const tituloAba = locals.titulo
+    || (locals.servico?.id ? `Ordem nº ${String(servico.id).padStart(4, "0")}` : titulos[caminho]);
+  const emNova = caminho === "/servicos/novo";
+  const emOrdens = caminho.startsWith("/servicos") && !emNova;
+  const atual = (ativo) => ativo ? 'aria-current="page"' : "";
+%>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= tituloAba ? tituloAba + " | " : "" %>Oficina Mecânica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topo">
+    <a href="/" class="marca">
+      <svg class="marca-icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3 17.7 6.3 21l6.3-6.3a4 4 0 0 0 5.1-5.4l-2.5 2.5-2.4-.6-.6-2.4z" fill="currentColor"/></svg>
+      Oficina Mecânica
+    </a>
+    <nav class="menu" aria-label="Principal">
+      <a href="/" <%- atual(caminho === "/") %>>Painel</a>
+      <a href="/servicos" <%- atual(emOrdens) %>>Ordens</a>
+      <a href="/documentacao" <%- atual(caminho === "/documentacao") %>>Documentação</a>
+      <a href="/servicos/novo" class="btn btn-principal" <%- atual(emNova) %>>Abrir ordem</a>
+    </nav>
+  </header>
+  <main class="container" id="conteudo">
+  <% if (aviso) { %><p class="aviso" role="status"><%= aviso %></p><% } %>

@@ -1,0 +1,23 @@
+<table class="tabela">
+  <thead>
+    <tr>
+      <th scope="col">Placa</th>
+      <th scope="col">Veículo</th>
+      <th scope="col">Cliente</th>
+      <th scope="col">Aberta em</th>
+      <th scope="col" class="num">Valor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% servicos.forEach(servico => { %>
+      <tr>
+        <td class="col-placa"><%- include("placa", { placa: servico.placa }) %></td>
+        <%# rótulos .sr-only: no celular a tabela vira lista e o leitor de tela perde o cabeçalho %>
+        <td class="col-veiculo"><a href="/servicos/<%= servico.id %>"><%= servico.veiculo %></a></td>
+        <td class="col-cliente"><span class="sr-only">Cliente: </span><%= servico.cliente %></td>
+        <td class="col-data"><span class="sr-only">Aberta em </span><%= servico.criadoEm.toLocaleDateString("pt-BR") %></td>
+        <td class="col-valor num"><span class="sr-only">Valor: </span><%= moeda(servico.valor) %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

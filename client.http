@@ -1,0 +1,61 @@
+# ==========================================================
+# Oficina Mecânica - Testes das rotas (extensão REST Client)
+# Clique em "Send Request" acima de cada requisição.
+# ==========================================================
+@baseUrl = http://localhost:3000
+@id = 1
+
+### 1. CREATE - Abrir ordem de serviço (POST)
+POST {{baseUrl}}/servicos
+Content-Type: application/json
+
+{
+  "cliente": "João Silva",
+  "veiculo": "Fiat Uno 2015",
+  "placa": "ABC1D23",
+  "descricao": "Troca de óleo e filtro.",
+  "valor": 180.00
+}
+
+### 2. READ - Listar serviços em JSON (GET)
+GET {{baseUrl}}/api/servicos
+
+### 3. READ - Buscar um serviço em JSON (GET)
+GET {{baseUrl}}/api/servicos/{{id}}
+
+### 4. READ - Página HTML da listagem (GET)
+GET {{baseUrl}}/servicos
+
+### 5. UPDATE - Atualizar serviço (PUT)
+PUT {{baseUrl}}/servicos/{{id}}
+Content-Type: application/json
+
+{
+  "cliente": "João Silva",
+  "veiculo": "Fiat Uno 2015",
+  "placa": "ABC1D23",
+  "descricao": "Troca de óleo, filtro e pastilhas de freio.",
+  "valor": 420.50
+}
+
+### 6. DELETE - Excluir serviço (DELETE)
+DELETE {{baseUrl}}/servicos/{{id}}
+
+# ---------------- Testes de erro ----------------
+
+### 7. Erro 400 - campos vazios
+POST {{baseUrl}}/servicos
+Content-Type: application/json
+
+{
+  "cliente": ""
+}
+
+### 8. Erro 400 - ID inválido (JSON)
+GET {{baseUrl}}/api/servicos/abc
+
+### 9. Erro 404 - serviço inexistente (JSON)
+GET {{baseUrl}}/api/servicos/9999
+
+### 10. Erro 404 - rota inexistente
+GET {{baseUrl}}/rota-que-nao-existe

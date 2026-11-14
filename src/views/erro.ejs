@@ -1,0 +1,14 @@
+<%- include("partials/header") %>
+<section class="ficha erro">
+  <header class="ficha-topo">
+    <h1 class="ficha-numero"><%= titulo %></h1>
+  </header>
+  <div class="erro-corpo">
+    <p><%= mensagem %></p>
+    <div class="acoes">
+      <a href="/servicos" class="btn btn-principal">Ver ordens de serviço</a>
+      <a href="/">Ir para o painel</a>
+    </div>
+  </div>
+</section>
+<%- include("partials/footer") %>

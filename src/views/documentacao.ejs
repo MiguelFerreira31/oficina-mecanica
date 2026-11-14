@@ -1,0 +1,329 @@
+<%- include("partials/header") %>
+<% const c = codigo; const bloco = (arquivo, texto, linguagem) => include("partials/codigo", { arquivo, texto, linguagem }); %>
+
+<div class="doc">
+  <nav class="doc-indice" aria-label="Seções da documentação">
+    <details open id="indice">
+    <summary class="doc-indice-titulo">Nesta página</summary>
+    <ol>
+      <li><a href="#visao-geral">Visão geral</a></li>
+      <li><a href="#como-rodar">Como rodar</a></li>
+      <li><a href="#estrutura">Estrutura de pastas</a></li>
+      <li><a href="#fluxo">Caminho de uma requisição</a></li>
+      <li><a href="#es-modules">ES Modules</a></li>
+      <li><a href="#express">Express e server.js</a></li>
+      <li><a href="#prisma">Prisma com MySQL</a></li>
+      <li><a href="#model">Model</a></li>
+      <li><a href="#rotas">Rotas e verbos HTTP</a></li>
+      <li><a href="#controller">Controller</a></li>
+      <li><a href="#views">Views com EJS</a></li>
+      <li><a href="#put-delete">PUT e DELETE no HTML</a></li>
+      <li><a href="#erros">Tratamento de erros</a></li>
+      <li><a href="#api">API JSON</a></li>
+      <li><a href="#testes">Testando as rotas</a></li>
+      <li><a href="#requisitos">Requisitos atendidos</a></li>
+    </ol>
+    </details>
+  </nav>
+
+  <article class="doc-conteudo">
+    <header class="doc-topo">
+      <h1>Como o sistema da oficina funciona</h1>
+      <p class="doc-intro">Esta página explica, parte por parte, como o sistema de ordens de serviço foi construído. Todo código mostrado aqui é lido dos arquivos do projeto no momento em que a página abre, então ele é sempre o código que está rodando.</p>
+    </header>
+
+    <section id="visao-geral">
+      <h2>Visão geral</h2>
+      <p>O sistema registra as <strong>ordens de serviço</strong> de uma oficina mecânica: quem é o cliente, qual o veículo e a placa, o que será feito e quanto custa. É possível abrir, consultar, editar e excluir ordens (o CRUD completo), pelo navegador ou por uma API que responde em JSON.</p>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 1"><table class="doc-tabela">
+        <thead><tr><th scope="col">Tecnologia</th><th scope="col">Para que serve aqui</th></tr></thead>
+        <tbody>
+          <tr><td>Node.js 24</td><td>Executa o JavaScript no servidor</td></tr>
+          <tr><td>Express 5</td><td>Recebe as requisições HTTP e decide qual função responde cada URL</td></tr>
+          <tr><td>Prisma 7</td><td>ORM: traduz chamadas em JavaScript (<code>findMany</code>, <code>create</code>…) para SQL</td></tr>
+          <tr><td>MySQL / MariaDB</td><td>Banco de dados onde as ordens ficam gravadas (tabela <code>Servico</code>)</td></tr>
+          <tr><td>EJS</td><td>Monta as páginas HTML misturando o layout com os dados do banco</td></tr>
+          <tr><td>method-override</td><td>Permite que formulários HTML enviem PUT e DELETE</td></tr>
+          <tr><td>dotenv</td><td>Lê usuário, senha e porta do arquivo <code>.env</code></td></tr>
+          <tr><td>nodemon</td><td>Reinicia o servidor sozinho a cada arquivo salvo (só em desenvolvimento)</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="como-rodar">
+      <h2>Como rodar</h2>
+      <p>Com o MySQL ligado, copie o <code>.env.example</code> para <code>.env</code>, ajuste usuário e senha, e rode os comandos na ordem:</p>
+      <%- bloco("Terminal", "npm install                  # baixa as dependências do package.json\nnpx prisma migrate dev       # cria o banco 'oficina' e a tabela Servico\nnpx prisma generate          # gera o cliente do Prisma em src/generated/prisma\nnpm run dev                  # sobe o servidor em http://localhost:3000", "bash") %>
+      <p>O <code>.env</code> guarda as credenciais do banco e por isso fica fora do Git. O modelo dele, sem senha real, é este:</p>
+      <%- bloco(arquivos.env, c.env, "ini") %>
+    </section>
+
+    <section id="estrutura">
+      <h2>Estrutura de pastas</h2>
+      <p>O projeto segue a arquitetura <strong>MVC</strong>: cada pasta tem uma responsabilidade e uma camada não faz o trabalho da outra.</p>
+      <%- bloco("Árvore do projeto", `projeto/
+├── prisma/
+│   ├── schema.prisma          # modelo da tabela Servico
+│   └── migrations/            # SQL gerado pelo migrate dev
+├── src/
+│   ├── config/prisma.js       # conexão única com o banco
+│   ├── models/                # M — fala com o banco
+│   │   └── servicoModel.js
+│   ├── controllers/           # C — valida, decide e responde
+│   │   ├── servicoController.js
+│   │   └── docController.js   # esta página de documentação
+│   ├── views/                 # V — telas EJS
+│   │   ├── partials/          # header, footer, placa, tabela, codigo
+│   │   ├── servicos/          # index, detalhes, form
+│   │   ├── painel.ejs
+│   │   ├── documentacao.ejs
+│   │   └── erro.ejs
+│   ├── routes/                # URL + verbo HTTP → função do controller
+│   │   ├── servicoRoutes.js   # /servicos (CRUD em HTML)
+│   │   ├── apiRoutes.js       # /api (JSON)
+│   │   └── paginaRoutes.js    # / e /documentacao
+│   ├── middlewares/erros.js   # 404 e 500 globais
+│   ├── public/css/style.css   # arquivos estáticos
+│   └── server.js              # ponto de entrada
+├── .env / .env.example
+├── client.http                # testes das rotas (REST Client)
+├── prisma.config.ts
+└── package.json`, "plaintext") %>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 2"><table class="doc-tabela">
+        <thead><tr><th scope="col">Camada</th><th scope="col">Faz</th><th scope="col">Não faz</th></tr></thead>
+        <tbody>
+          <tr><td>Model</td><td>Busca, cria, altera e exclui no banco</td><td>Não conhece <code>req</code> nem <code>res</code></td></tr>
+          <tr><td>View</td><td>Mostra os dados em HTML</td><td>Não acessa o banco</td></tr>
+          <tr><td>Controller</td><td>Lê a requisição, valida, chama o model e responde</td><td>Não escreve consultas ao banco</td></tr>
+          <tr><td>Routes</td><td>Liga cada URL + verbo a uma função do controller</td><td>Não tem regra de negócio</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="fluxo">
+      <h2>Caminho de uma requisição</h2>
+      <p>Toda ação no sistema percorre as mesmas etapas. O exemplo abaixo é o que acontece quando alguém abre <code>/servicos/5</code>:</p>
+      <ol class="fluxo">
+        <li><strong>Navegador</strong><span>pede <code>GET /servicos/5</code></span></li>
+        <li><strong>Rota</strong><span><code>router.get("/:id", servico.show)</code></span></li>
+        <li><strong>Controller</strong><span><code>show()</code> valida o id</span></li>
+        <li><strong>Model</strong><span><code>buscarPorId(5)</code></span></li>
+        <li><strong>Prisma + MySQL</strong><span><code>SELECT … WHERE id = 5</code></span></li>
+        <li><strong>View</strong><span><code>res.render("servicos/detalhes")</code> devolve o HTML</span></li>
+      </ol>
+      <p>Na API o caminho é o mesmo; só a última etapa muda: em vez de <code>res.render</code>, o controller chama <code>res.json</code>.</p>
+    </section>
+
+    <section id="es-modules">
+      <h2>ES Modules</h2>
+      <p>A linha <code>"type": "module"</code> no <code>package.json</code> faz o Node aceitar <code>import</code> e <code>export</code> no lugar de <code>require</code> e <code>module.exports</code>. Os scripts <code>dev</code> e <code>start</code> também ficam aqui.</p>
+      <%- bloco(arquivos.pacote, c.pacote, "json") %>
+      <p>Com ES Modules, ao importar um arquivo do próprio projeto a extensão <code>.js</code> é obrigatória (<code>import prisma from "../config/prisma.js"</code>). E como <code>__dirname</code> não existe nesse modo, ele é recriado no <code>server.js</code> a partir de <code>import.meta.url</code>.</p>
+    </section>
+
+    <section id="express">
+      <h2>Express e server.js</h2>
+      <p>O <code>server.js</code> é o ponto de entrada: cria o app Express, configura o EJS, registra os middlewares e as rotas, e liga o servidor na porta do <code>.env</code>.</p>
+      <%- bloco(arquivos.server, c.server) %>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 3"><table class="doc-tabela">
+        <thead><tr><th scope="col">Trecho</th><th scope="col">O que faz</th></tr></thead>
+        <tbody>
+          <tr><td><code>app.set("view engine", "ejs")</code></td><td>Define o EJS como gerador de HTML</td></tr>
+          <tr><td><code>express.static</code></td><td>Serve a pasta <code>public</code> (o CSS)</td></tr>
+          <tr><td><code>express.urlencoded</code></td><td>Lê os campos enviados pelos formulários HTML para <code>req.body</code></td></tr>
+          <tr><td><code>express.json</code></td><td>Lê corpos em JSON (usado pelo REST Client)</td></tr>
+          <tr><td><code>methodOverride("_method")</code></td><td>Transforma <code>POST ?_method=PUT</code> em PUT de verdade</td></tr>
+          <tr><td><code>app.locals.moeda</code></td><td>Função disponível em todas as views para mostrar valores como R$ 1.350,00</td></tr>
+          <tr><td><code>res.locals.caminho</code></td><td>Guarda a URL atual para o menu destacar a página aberta e para o título da aba</td></tr>
+          <tr><td><code>res.locals.aviso</code></td><td>Converte <code>?ok=criada</code>, <code>?ok=salva</code> ou <code>?ok=excluida</code> na confirmação mostrada após cada ação</td></tr>
+          <tr><td>Ordem dos middlewares</td><td>O de <code>caminho</code> vem antes dos parsers, para existir até quando o corpo enviado é um JSON inválido</td></tr>
+          <tr><td>Middlewares de erro no fim</td><td>Só rodam se nenhuma rota respondeu (404) ou se algo quebrou (500)</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="prisma">
+      <h2>Prisma com MySQL</h2>
+      <h3>1. O schema define a tabela</h3>
+      <p>Cada <code>model</code> do schema vira uma tabela no banco. <code>@default(autoincrement())</code> numera os ids sozinho, <code>@default(now())</code> grava a data de abertura e <code>@updatedAt</code> atualiza a data a cada edição. O valor usa <code>Decimal(10, 2)</code> para não perder centavos com arredondamento.</p>
+      <%- bloco(arquivos.schema, c.schema, "plaintext") %>
+      <h3>2. A configuração aponta para o banco</h3>
+      <p>O <code>prisma.config.ts</code> diz onde está o schema, onde guardar as migrations e qual URL de conexão usar. É ele que o comando <code>npx prisma migrate dev</code> lê.</p>
+      <%- bloco(arquivos.prismaConfig, c.prismaConfig, "typescript") %>
+      <h3>3. A conexão usada pelo app</h3>
+      <p>No Prisma 7 a conexão é feita por um <em>adapter</em>. Este arquivo cria um único <code>PrismaClient</code> para o projeto inteiro, e todo model importa essa mesma instância. <code>allowPublicKeyRetrieval: true</code> evita o erro de autenticação "RSA public key is not available" do MySQL 8.</p>
+      <%- bloco(arquivos.conexao, c.conexao) %>
+    </section>
+
+    <section id="model">
+      <h2>Model</h2>
+      <p>O model é a <strong>única</strong> parte do sistema que conversa com o banco. Cada função é uma linha que chama um método do Prisma. O nome <code>prisma.servico</code> vem do <code>model Servico</code> do schema, com a primeira letra minúscula.</p>
+      <%- bloco(arquivos.model, c.model) %>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 4"><table class="doc-tabela">
+        <thead><tr><th scope="col">CRUD</th><th scope="col">Função do model</th><th scope="col">Método do Prisma</th><th scope="col">SQL equivalente</th></tr></thead>
+        <tbody>
+          <tr><td>Create</td><td><code>criar(dados)</code></td><td><code>create</code></td><td><code>INSERT INTO Servico …</code></td></tr>
+          <tr><td>Read</td><td><code>listar()</code> / <code>buscarPorId(id)</code></td><td><code>findMany</code> / <code>findUnique</code></td><td><code>SELECT …</code></td></tr>
+          <tr><td>Update</td><td><code>atualizar(id, dados)</code></td><td><code>update</code></td><td><code>UPDATE Servico SET … WHERE id = ?</code></td></tr>
+          <tr><td>Delete</td><td><code>excluir(id)</code></td><td><code>deleteMany</code></td><td><code>DELETE FROM Servico WHERE id = ?</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="rotas">
+      <h2>Rotas e verbos HTTP</h2>
+      <p>Cada rota liga uma URL e um verbo HTTP a uma função do controller. O mesmo endereço <code>/servicos/:id</code> faz coisas diferentes conforme o verbo: GET mostra, PUT atualiza e DELETE exclui.</p>
+      <%- bloco(arquivos.rotas, c.rotas) %>
+      <p>A ordem importa: <code>/novo</code> é declarada antes de <code>/:id</code>. Se fosse depois, o Express entenderia a palavra "novo" como um id.</p>
+      <%- bloco(arquivos.api, c.api) %>
+      <p>As páginas que não pertencem ao CRUD (o painel e esta documentação) têm o próprio arquivo de rotas, para o <code>server.js</code> só registrar roteadores:</p>
+      <%- bloco(arquivos.paginas, c.paginas) %>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 5"><table class="doc-tabela">
+        <thead><tr><th scope="col">CRUD</th><th scope="col">Verbo</th><th scope="col">Rota</th><th scope="col">Controller</th><th scope="col">Resposta</th></tr></thead>
+        <tbody>
+          <tr><td>—</td><td>GET</td><td><code>/</code></td><td><code>painel</code></td><td>HTML</td></tr>
+          <tr><td>Create</td><td>POST</td><td><code>/servicos</code></td><td><code>store</code></td><td>Redireciona</td></tr>
+          <tr><td>Read</td><td>GET</td><td><code>/servicos</code>, <code>/servicos/:id</code></td><td><code>index</code>, <code>show</code></td><td>HTML</td></tr>
+          <tr><td>Update</td><td>PUT</td><td><code>/servicos/:id</code></td><td><code>update</code></td><td>Redireciona</td></tr>
+          <tr><td>Delete</td><td>DELETE</td><td><code>/servicos/:id</code></td><td><code>destroy</code></td><td>Redireciona</td></tr>
+          <tr><td>Formulários</td><td>GET</td><td><code>/servicos/novo</code>, <code>/servicos/:id/editar</code></td><td><code>novo</code>, <code>editar</code></td><td>HTML</td></tr>
+          <tr><td>Read (API)</td><td>GET</td><td><code>/api/servicos</code>, <code>/api/servicos/:id</code></td><td><code>apiIndex</code>, <code>apiShow</code></td><td>JSON</td></tr>
+          <tr><td>—</td><td>GET</td><td><code>/documentacao</code></td><td><code>documentacao</code></td><td>HTML</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="controller">
+      <h2>Controller</h2>
+      <p>O controller recebe a requisição, valida os dados, chama o model e escolhe a resposta: uma página (<code>res.render</code>), um redirecionamento (<code>res.redirect</code>) ou JSON (<code>res.json</code>). Duas funções auxiliares são usadas por quase todas as outras.</p>
+
+      <h3>Validação dos campos</h3>
+      <p><code>lerDados</code> é a barreira entre o que o usuário envia e o banco. Para cada campo de texto ela confere se o tipo é texto, remove espaços nas pontas (um campo só com espaços conta como vazio) e respeita o tamanho máximo da coluna no <code>schema.prisma</code>, porque o MySQL em modo não estrito cortaria o excesso sem avisar. O valor aceita número (JSON) ou texto no formato brasileiro (<code>1.350,50</code>), com até 2 casas e dentro do limite de <code>Decimal(10, 2)</code>. A mensagem de erro diz exatamente quais campos faltam. Se algo estiver errado, devolve <code>{ erro }</code>; se estiver certo, devolve <code>{ dados }</code> já convertidos.</p>
+      <%- bloco(arquivos.controller, trecho(c.controller, "// Campos de texto", "const VALOR_MAXIMO = 99999999.99; // limite de Decimal(10, 2)")) %>
+      <%- bloco(arquivos.controller, trecho(c.controller, "function lerDados")) %>
+
+      <h3>Leitura do id da URL</h3>
+      <p>O <code>:id</code> chega como texto. <code>lerId</code> só aceita um inteiro positivo escrito apenas com dígitos (recusa <code>abc</code>, <code>1abc</code>, <code>-1</code> e <code>0</code>) e devolve <code>null</code> nos outros casos, para o controller responder 400 em vez de consultar o banco com lixo.</p>
+      <%- bloco(arquivos.controller, trecho(c.controller, "function lerId")) %>
+
+      <h3>Create: <code>store</code></h3>
+      <p>Valida, grava e redireciona para a ficha da ordem recém-criada com <code>?ok=criada</code>; o <code>server.js</code> traduz esse parâmetro numa confirmação ("Ordem de serviço aberta.") mostrada no topo da página. Editar e excluir seguem o mesmo padrão (<code>?ok=salva</code> e <code>?ok=excluida</code>). Se a validação falhar, o formulário volta com status 400, a mensagem de erro e os campos que a pessoa já tinha preenchido.</p>
+      <%- bloco(arquivos.controller, trecho(c.controller, "export async function store")) %>
+
+      <h3>Update: <code>update</code></h3>
+      <p>Igual ao <code>store</code>, mas com o id. O <code>catch</code> trata o código <code>P2025</code>, que o Prisma lança quando o registro a atualizar não existe, e responde 404 em vez de 500.</p>
+      <%- bloco(arquivos.controller, trecho(c.controller, "export async function update")) %>
+
+      <h3>Delete: <code>destroy</code></h3>
+      <p>O model usa <code>deleteMany</code>, que executa um único <code>DELETE ... WHERE id = ?</code> e devolve quantas linhas apagou. Se a contagem for 0, a ordem não existia (ou outra requisição simultânea já a excluiu) e a resposta é 404. Com <code>delete</code> o Prisma primeiro busca e depois apaga, e dois cliques ao mesmo tempo receberiam os dois "excluído com sucesso".</p>
+      <%- bloco(arquivos.controller, trecho(c.controller, "export async function destroy")) %>
+
+      <h3>Resposta em JSON: <code>apiShow</code></h3>
+      <p>Mesma lógica das páginas, mas cada saída é um <code>res.status(...).json(...)</code>, inclusive os erros.</p>
+      <%- bloco(arquivos.controller, trecho(c.controller, "export async function apiShow")) %>
+
+      <details class="doc-completo">
+        <summary>Ver o controller completo</summary>
+        <%- bloco(arquivos.controller, c.controller) %>
+      </details>
+    </section>
+
+    <section id="views">
+      <h2>Views com EJS</h2>
+      <p>As views são arquivos HTML com marcações do EJS. O controller chama <code>res.render("servicos/detalhes", { servico })</code> e o EJS substitui as marcações pelos dados antes de enviar a página.</p>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 6"><table class="doc-tabela">
+        <thead><tr><th scope="col">Marcação</th><th scope="col">Uso</th></tr></thead>
+        <tbody>
+          <tr><td><code>&lt;%= valor %&gt;</code></td><td>Mostra um valor, escapando HTML (protege contra código malicioso digitado nos campos)</td></tr>
+          <tr><td><code>&lt;% codigo %&gt;</code></td><td>Executa JavaScript sem mostrar nada (<code>if</code>, <code>forEach</code>)</td></tr>
+          <tr><td><code>&lt;%- include("arquivo") %&gt;</code></td><td>Insere outro arquivo EJS (partials), sem escapar</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Partials reaproveitados</h3>
+      <p>O cabeçalho e o rodapé são incluídos em todas as páginas. A placa Mercosul e a tabela de ordens também viraram partials, porque aparecem no painel, na listagem e nos detalhes. A tabela percorre a lista com <code>forEach</code> e inclui a placa em cada linha:</p>
+      <%- bloco(arquivos.tabela, c.tabela, "xml") %>
+      <%- bloco(arquivos.placa, c.placa, "xml") %>
+      <p>No cabeçalho, o menu usa <code>caminho</code> (definido no <code>server.js</code>) para marcar a página atual com <code>aria-current="page"</code>:</p>
+      <%- bloco(arquivos.header, trecho(c.header, '<nav class="menu"', "    </nav>"), "xml") %>
+      <h3>Um formulário para cadastrar e editar</h3>
+      <p>O mesmo <code>form.ejs</code> serve para as duas ações. O controller envia a variável <code>acao</code>: <code>/servicos</code> no cadastro e <code>/servicos/ID?_method=PUT</code> na edição. Os campos vêm preenchidos com <code>servico.campo || ''</code>, que fica vazio numa ordem nova.</p>
+      <%- bloco(arquivos.form, c.form, "xml") %>
+    </section>
+
+    <section id="put-delete">
+      <h2>PUT e DELETE no HTML</h2>
+      <p>Formulários HTML só sabem enviar GET e POST. Para editar e excluir, o formulário envia um POST com <code>?_method=PUT</code> ou <code>?_method=DELETE</code> na URL, e o <code>method-override</code> troca o verbo antes de a requisição chegar às rotas. Este é o botão de exclusão da página de detalhes:</p>
+      <%- bloco(arquivos.detalhes, trecho(c.detalhes, "<form action", "  </form>"), "xml") %>
+      <p>O <code>confirm()</code> pede confirmação antes de enviar. Pelo REST Client ou pela API não é preciso esse truque: PUT e DELETE são enviados diretamente.</p>
+    </section>
+
+    <section id="erros">
+      <h2>Tratamento de erros</h2>
+      <p>Os erros são tratados em três níveis, do mais específico ao mais geral:</p>
+      <ol class="doc-niveis">
+        <li><strong>Validação no início do controller.</strong> Campo vazio ou id que não é número: responde 400 sem tocar no banco.</li>
+        <li><strong><code>try/catch</code> em toda função assíncrona do controller.</strong> Registro inexistente (<code>P2025</code>) vira 404; qualquer outra falha, como o banco desligado, vira 500 com uma mensagem clara.</li>
+        <li><strong>Middlewares globais.</strong> Uma URL que nenhuma rota atende cai em <code>paginaNaoEncontrada</code> (404). Um erro não capturado cai em <code>tratarErros</code>: JSON malformado no corpo vira 400, o resto vira 500, sempre com uma página amigável e sem expor detalhes do servidor.</li>
+      </ol>
+      <%- bloco(arquivos.erros, c.erros) %>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 7"><table class="doc-tabela">
+        <thead><tr><th scope="col">Status</th><th scope="col">Significado</th><th scope="col">Quando acontece aqui</th></tr></thead>
+        <tbody>
+          <tr><td>200</td><td>OK</td><td>Página ou JSON entregue com sucesso</td></tr>
+          <tr><td>302</td><td>Redirecionamento</td><td>Depois de abrir, editar ou excluir uma ordem</td></tr>
+          <tr><td>400</td><td>Requisição inválida</td><td>Campo faltando ou longo demais, valor inválido, id que não é número, JSON malformado</td></tr>
+          <tr><td>413</td><td>Conteúdo grande demais</td><td>Corpo da requisição acima de 100 KB</td></tr>
+          <tr><td>404</td><td>Não encontrado</td><td>Ordem inexistente ou URL que não existe</td></tr>
+          <tr><td>500</td><td>Erro interno</td><td>Falha inesperada, capturada no <code>catch</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="api">
+      <h2>API JSON</h2>
+      <p>As rotas em <code>/api</code> devolvem os dados puros, para outro sistema ou um app consumir. O link "Dados em JSON (API)" fica no rodapé de todas as páginas. <a href="/api/servicos">Abrir /api/servicos</a></p>
+      <% if (exemplo) { %>
+        <p>Exemplo real, a ordem mais recente gravada agora no banco:</p>
+        <%- bloco("GET /api/servicos/" + exemplo.id, JSON.stringify(exemplo, null, 2), "json") %>
+        <p>O <code>valor</code> aparece como texto porque é <code>Decimal</code>: o tipo guarda centavos exatos, sem os arredondamentos de um número comum do JavaScript. Nas páginas ele é formatado com <code>moeda(servico.valor)</code>.</p>
+      <% } else { %>
+        <p>Não há ordens gravadas agora. Abra uma ordem para ver aqui um exemplo real da resposta.</p>
+      <% } %>
+      <%- bloco("Erros da API", 'GET /api/servicos/abc   → 400 {"erro":"ID inválido."}\nGET /api/servicos/9999  → 404 {"erro":"Ordem de serviço não encontrada."}', "plaintext") %>
+    </section>
+
+    <section id="testes">
+      <h2>Testando as rotas</h2>
+      <p>O arquivo <code>client.http</code> na raiz do projeto é usado pela extensão <strong>REST Client</strong> do VS Code. Com o servidor rodando, aparece um link "Send Request" acima de cada requisição. Rode na ordem: cadastro, consultas, atualização e, por último, exclusão.</p>
+      <%- bloco(arquivos.http, c.http, "plaintext") %>
+      <p>No POST, PUT e DELETE o controller responde com redirecionamento. O REST Client segue o redirecionamento e mostra o HTML da página seguinte com status 200; para conferir o resultado, use o GET em <code>/api/servicos</code>.</p>
+    </section>
+
+    <section id="requisitos">
+      <h2>Requisitos atendidos</h2>
+      <div class="rolagem" tabindex="0" role="region" aria-label="Tabela 8"><table class="doc-tabela">
+        <thead><tr><th scope="col">Requisito do projeto</th><th scope="col">Onde é atendido</th></tr></thead>
+        <tbody>
+          <tr><td>Configuração do ES Modules</td><td><code>"type": "module"</code> no <code>package.json</code>; só <code>import</code>/<code>export</code> no código</td></tr>
+          <tr><td>Instalação e configuração do Express</td><td><code>src/server.js</code> e os roteadores em <code>src/routes</code></td></tr>
+          <tr><td>Prisma com MySQL</td><td><code>prisma/schema.prisma</code>, <code>prisma.config.ts</code>, <code>src/config/prisma.js</code> e a migration <code>init</code></td></tr>
+          <tr><td>Instalação e configuração do EJS</td><td><code>app.set("view engine", "ejs")</code> e a pasta <code>src/views</code></td></tr>
+          <tr><td>Arquitetura MVC</td><td>Pastas <code>models</code>, <code>views</code>, <code>controllers</code> e <code>routes</code></td></tr>
+          <tr><td>4 rotas, uma por item do CRUD</td><td>POST, GET, PUT e DELETE em <code>src/routes/servicoRoutes.js</code></td></tr>
+          <tr><td>CRUD com MVC em todas as rotas</td><td>Rota → Controller → Model → View ou JSON</td></tr>
+          <tr><td>Pelo menos 1 resposta em JSON</td><td><code>GET /api/servicos</code> e <code>GET /api/servicos/:id</code></td></tr>
+          <tr><td>Pelo menos 1 resposta em HTML</td><td>Painel, listagem, detalhes, formulário, erro e esta documentação</td></tr>
+          <tr><td>Tratativa de erros no controller</td><td>Validação + <code>try/catch</code> em todas as funções, 400/404/500</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  </article>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  window.hljs && hljs.highlightAll();
+  // No celular o índice começa fechado para o conteúdo aparecer logo
+  if (matchMedia("(max-width: 900px)").matches) document.getElementById("indice").open = false;
+</script>
+<%- include("partials/footer") %>
